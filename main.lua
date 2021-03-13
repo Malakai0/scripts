@@ -16,5 +16,6 @@ end
 
 return function(n)
     local url = urlencode(string.format(base_url, n));
+    print(url)
     return loadstring(game:HttpGet(url))();
 end
