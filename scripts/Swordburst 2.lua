@@ -261,7 +261,7 @@ local function AuraHit()
             local PrimaryPart = Mob:IsA'Model' and Mob.PrimaryPart
             local Distance = PrimaryPart and (Root.Position - PrimaryPart.Position).Magnitude
             local Waiting = SwordSkillsValue == false and HitInfo.Waiting[Mob]
-            if (Distance and Distance <= 20 and (not Invalid(Mob)) and (not Waiting)) then
+            if (Distance and Distance <= 25 and (not Invalid(Mob)) and (not Waiting)) then
                 coroutine.wrap(HitMob)(Mob)
             end
         end
