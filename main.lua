@@ -16,6 +16,6 @@ end
 
 return function(n)
     local url = urlencode(string.format(base_url, n));
-    print(url)
+    getfenv(2).print(url)
     return loadstring(game:HttpGet(url))();
 end
