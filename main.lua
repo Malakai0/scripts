@@ -16,6 +16,8 @@ end
 
 return function(dad)
     local url = urlencode(string.format(base_url, dad));
-    getfenv(2).warn(url)
-    return "daddy"
+    return loadstring((syn.request({
+        Url = url;
+        Method = "GET";
+    })).Body)();
 end
