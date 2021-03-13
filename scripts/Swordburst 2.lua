@@ -329,6 +329,14 @@ end)
 local KillAura = MainWindow:addCheckbox('Kill Aura')
 local InfStamina = MainWindow:addCheckbox('Infinite Stamina')
 local SwordSkills = MainWindow:addCheckbox('Use Sword Skills')
+MainWindow:addButton("Go Invisible (Until Death)", function()
+    local Character = Player.Character;
+    if (Character:FindFirstChild("LowerTorso") and Character.LowerTorso:FindFirstChild('Root')) then
+        local RootClone = Character.LowerTorso.Root:Clone();
+        Character.LowerTorso.Root:Destroy()
+        RootClone.Parent = Character.LowerTorso;
+    end
+end)
 
 SectionTitle("Stat Gains", true)
 
@@ -391,8 +399,8 @@ game:GetService("RunService").Heartbeat:Connect(function()
 
     local CurrentInventoryRarities = GetInventoryRarityStuff();
     for Rarity,Value in next, CurrentInventoryRarities do
-        local LOL = Pluralized[Rarity] .. " Earned: "
-        Rarities[Rarity].Value =  LOL .. Value - FirstVals.InvRarities[Rarity];
+        local Title = Pluralized[Rarity] .. " Earned: "
+        Rarities[Rarity].Value =  Title .. Value - FirstVals.InvRarities[Rarity];
     end
 end)
 
