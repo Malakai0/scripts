@@ -1,3 +1,8 @@
+if (not getrawmetatable or not setreadonly) then
+    warn("Exploit isn't supported.");
+    repeat wait(5) until nil;
+end
+
 local UILibrary = loadstring(game:HttpGet"https://gist.githubusercontent.com/Whomever0/0fad2d925349ea6e2806da00cb9b3a93/raw/1fbf36b4077ff0f0589d7068ef7f353eb7ae583f/UILib.lua")()
 local ChooseType = UILibrary:MakeWindow('Skill Type')
 ChooseType:addLabel('CHOOSE YOUR SKILL TYPE', 'Center')
@@ -22,19 +27,26 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Player = game:GetService'Players'.LocalPlayer
 local PlayerProfile = ReplicatedStorage:WaitForChild'Profiles':WaitForChild(Player.Name)
+local Vel,Exp = PlayerProfile.Stats.Vel, PlayerProfile.Stats.Exp;
+local Inventory = PlayerProfile.Inventory;
 
 local Database = ReplicatedStorage.Database;
 
 local Event = ReplicatedStorage.Event;
 local Function = ReplicatedStorage.Function;
 
-local SwordMethod = '';
 local ExploitCallKey = tostring(math.random(0,999)) .. string.char(math.random(0,100))
-local CombatModule, UtilModule;
+local UtilModule;
+
+local ToggleValue = false;
+local SwordSkillsValue = false;
 
 local HitInfo = {
     HitCounter = {};
     Waiting = {};
+    HaveHit = {};
+    Killed = {};
+    TotalKills = 0 ;
 };
 
 local WhitelistedSkills = {
@@ -47,22 +59,51 @@ local WhitelistedClasses = {
     ['1HSword'] = 'Sweeping Strike';
 }
 
+local MainWindow = UILibrary:MakeWindow('Main')
+
+local function Separator()
+    return MainWindow:addLabel("","Center")
+end
+
+local function SectionTitle(n,notfirst)
+    if notfirst then Separator() end
+    MainWindow:addLabel(n, "Center")
+    --Separator()
+end
+
 local function SetModules()
     for i,v in next, getgc(true) do
-        if type(v) == 'table' and rawget(v, 'DamageArea') then
-            CombatModule = v;
-        elseif (type(v) == 'table' and rawget(v, 'LevelFromExp')) then
+        if (type(v) == 'table' and rawget(v, 'LevelFromExp')) then
             UtilModule = v;
+            break;
         end
     end
 end
 SetModules()
 
-if not CombatModule then
+if not UtilModule then
     repeat
         wait(1)
         SetModules()
-    until CombatModule
+    until UtilModule
+end
+
+local function GetInventoryRarityStuff()
+    local DATA = {
+        ["Legendary"] = 0;
+        ["Rare"] = 0;
+        ["Uncommon"] = 0;
+        ["Common"] = 0;
+    }
+    for _,Item in next, Inventory:GetChildren() do
+        local DB = Database.Items:FindFirstChild(Item.Name);
+        if (DB) then
+            if (DATA[DB.Rarity.Value]) then
+                DATA[DB.Rarity.Value] = DATA[DB.Rarity.Value] + 1;
+            end
+        end
+    end
+    return DATA;
 end
 
 local function GetSkill()
@@ -151,33 +192,6 @@ local function PerformEpic()
     end
 end
 
-if (TypeChosen == 2) then
-    PerformEpic()
-else
-    Event:FireServer('Skills',{
-        'UseSkill','Summon Pistol'
-    })
-end
-
-local ToggleValue = false;
-local SwordSkillsValue = false;
-
-local MainWindow = UILibrary:MakeWindow('Main')
-
-local Toggled = MainWindow:addCheckbox('Multiplier Toggle')
-local MultiplierTextbox = MainWindow:addTextBoxF('Damage Multiplier', function(Text)
-    getgenv().Multiplier = tonumber(Text) and math.max(tonumber(Text), 1) or 1;
-end)
-local KillAura = MainWindow:addCheckbox('Kill Aura')
-local InfStamina = MainWindow:addCheckbox('Infinite Stamina')
-local SwordSkills = MainWindow:addCheckbox('Use Sword Skills')
-MainWindow:addLabel("Made by malakai#1962", 'Center');
-
-if (not getrawmetatable or not setreadonly) then
-    print("Exploit isn't supported.");
-    repeat wait(5) until nil;
-end
-
 local function GetCooldown()
     return getgenv().SB2_WAIT_TIME or 1.05;
 end
@@ -201,6 +215,10 @@ local function Invalid(Target)
         return true
     end
 
+    if (not Target:FindFirstChild('Entity')) then
+        return true;
+    end
+
     if (Player.Character.Entity.Health.Value <= Player.Character.Entity.Health.MinValue) then
         return true
     end
@@ -212,7 +230,24 @@ local function Invalid(Target)
     return false
 end
 
+local function KilledMobCheck(Target)
+    if (Invalid(Target) and HitInfo.Killed[Target]) then
+        return true
+    end
+    if (Target.Entity.Health.Value <= 0) then
+        if (HitInfo.HaveHit[Target] == true and HitInfo.Killed[Target] == nil) then
+            HitInfo.Killed[Target] = true;
+            HitInfo.TotalKills  = HitInfo.TotalKills + 1;
+            return true
+        end
+    end
+end
+
 local function HitMob(Target)
+
+    if (Invalid(Target)) then
+        return false;
+    end
 
     local Normal = (SwordSkillsValue == false)
 
@@ -249,7 +284,16 @@ local function HitMob(Target)
         ExploitCallKey
     }
 
-    coroutine.wrap(Event.FireServer)(Event, unpack(Arguments))
+    HitInfo.HaveHit[Target] = true;
+    coroutine.wrap(function()
+        Event:FireServer(unpack(Arguments));
+        for i = 1, 500 do
+            if (KilledMobCheck(Target)) then
+                break
+            end
+            wait(0.01)
+        end
+    end)()
     return true
 end
 
@@ -268,8 +312,64 @@ local function AuraHit()
     end
 end
 
+if (TypeChosen == 2) then
+    PerformEpic()
+else
+    Event:FireServer('Skills',{
+        'UseSkill','Summon Pistol'
+    })
+end
+
+SectionTitle("Combat")
+
+local MultiplierTextbox = MainWindow:addTextBoxF('Damage Multiplier', function(Text)
+    local formatted,_ = Text:gsub("%D", "");
+    getgenv().Multiplier = tonumber(formatted) and math.max(tonumber(formatted), 1) or 1;
+end)
+local KillAura = MainWindow:addCheckbox('Kill Aura')
+local InfStamina = MainWindow:addCheckbox('Infinite Stamina')
+local SwordSkills = MainWindow:addCheckbox('Use Sword Skills')
+
+SectionTitle("Stat Gains", true)
+
+local velTracker = MainWindow:addLabel("Vel earned: 0", "Left");
+local expTracker = MainWindow:addLabel("EXP Earned: 0", "Left");
+local levelTracker = MainWindow:addLabel("Levels gained: 0", "Left");
+local killsTracker = MainWindow:addLabel("Kills: 0", "Left");
+
+SectionTitle("Inventory Gains", true)
+
+local legendariesEarned = MainWindow:addLabel("Legendaries Earned: 0", "Left");
+local raresEarned = MainWindow:addLabel("Rares Earned: 0", "Left");
+local uncommonsEarned = MainWindow:addLabel("Uncommons Earned: 0", "Left");
+local commonsEarned = MainWindow:addLabel("Commons Earned: 0", "Left");
+
+Separator();
+MainWindow:addLabel("Made by malakai#1962", 'Center');
+
+local Rarities = {
+    ["Legendary"] = legendariesEarned;
+    ["Rare"] = raresEarned;
+    ["Uncommon"] = uncommonsEarned;
+    ["Common"] = commonsEarned;
+};
+
+local Pluralized = {
+    ["Legendary"] = "Legendaries";
+    ["Rare"] = "Rares";
+    ["Uncommon"] = "Uncommons";
+    ["Common"] = "Commons";
+}
+
+local FirstVals = {
+    Vel = Vel.Value;
+    Exp = Exp.Value;
+    Level = math.floor(UtilModule.LevelFromExp(Exp.Value));
+    InvRarities = GetInventoryRarityStuff();
+}
+
 game:GetService("RunService").Heartbeat:Connect(function()
-    ToggleValue = Toggled.Checked.Value
+    ToggleValue = true
     SwordSkillsValue = SwordSkills.Checked.Value
 
     if (KillAura.Checked.Value) then
@@ -281,6 +381,18 @@ game:GetService("RunService").Heartbeat:Connect(function()
             Player.Character:WaitForChild("Entity").Stamina.Value = 100
         end
         coroutine.wrap(Event.FireServer)(Event, 'Actions', {'Sprint','Disabled'})
+    end
+
+    local currentLevel = math.floor(UtilModule.LevelFromExp(Exp.Value))
+    levelTracker.Value = "Levels Gained: " .. currentLevel - FirstVals.Level;
+    velTracker.Value = "Vel Earned: " .. Vel.Value - FirstVals.Vel;
+    expTracker.Value = "Exp Earned: " .. Exp.Value - FirstVals.Exp;
+    killsTracker.Value = "Kills: " .. HitInfo.TotalKills;
+
+    local CurrentInventoryRarities = GetInventoryRarityStuff();
+    for Rarity,Value in next, CurrentInventoryRarities do
+        local LOL = Pluralized[Rarity] .. " Earned: "
+        Rarities[Rarity].Value =  LOL .. Value - FirstVals.InvRarities[Rarity];
     end
 end)
 
@@ -317,10 +429,16 @@ Meta.__namecall = function(self,...)
             end
 
             return nil;
+        elseif (IsExploitCall == false and Waiting) then
+            if Invalid(Mob) then return end;
+            HitMob(Mob)
+            return nil;
         end
     elseif (self == Event and IsActionService and IsSprintStep) then
         return;
     end
 
     return Namecall(self,...)
-end
+end;
+
+return nil;
