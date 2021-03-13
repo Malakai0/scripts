@@ -10,7 +10,7 @@ local function urlencode(url)
     end
     url = url:gsub("\n", "\r\n")
     url = url:gsub("([^%w _%%%-%.~])", convert)
-    url = url:gsub(" ", "+")
+    url = url:gsub(" ", "%20")
     return url
 end
 
