@@ -9,15 +9,12 @@ local function urlencode(url)
         return
     end
     url = url:gsub("\n", "\r\n")
-    url = url:gsub("([^%w ])", convert)
+    url = url:gsub("([^%w _%%%-%.~])", convert)
     url = url:gsub(" ", "+")
     return url
 end
 
 return function(dad)
     local url = urlencode(string.format(base_url, dad));
-    return loadstring((syn.request({
-        Url = url;
-        Method = "GET";
-    })).Body)();
+    return loadstring(game:HttpGet(url))();
 end
