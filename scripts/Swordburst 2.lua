@@ -3,16 +3,18 @@ if (not getrawmetatable or not setreadonly) then
     repeat wait(5) until nil;
 end
 
-local UILibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/preztel/AzureLibrary/master/uilib.lua", true))()
-local ChooseType = UILibrary:CreateTab('Skill Type', 'Select Skill Type', true)
+local UILibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/Whomever0/exploit-scripts/master/main.lua"))()("UILibrary")
+local ChooseType = UILibrary:MakeWindow('Skill Type')
+ChooseType:addLabel('CHOOSE YOUR SKILL TYPE', 'Center')
+ChooseType:addLabel('OP does a lot more DMG', 'Center')
 
 local TypeChosen = -1;
 
-ChooseType:CreateButton('OP', function()
+ChooseType:addButton('OP', function()
     TypeChosen = 1;
 end)
 
-ChooseType:CreateButton('Normal', function()
+ChooseType:addButton('Normal', function()
     TypeChosen = 2;
 end)
 
@@ -57,7 +59,7 @@ local WhitelistedClasses = {
     ['1HSword'] = 'Sweeping Strike';
 }
 
-local MainWindow = UILibrary:CreateWindow('Main')
+local MainWindow = UILibrary:MakeWindow('Main')
 
 local function Separator()
     return MainWindow:addLabel("","Center")
