@@ -394,7 +394,7 @@ function lib:MakeWindow(title)
 			
 		end
 		
-		DropdownBtn.MouseButton1Click:connect(function()
+		DropdownBtn.MouseButton1Click:Connect(function()
 			for i,v in pairs(items:GetChildren()) do
 				open.Value = true;
 				v.Visible = true;

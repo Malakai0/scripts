@@ -3,7 +3,8 @@ if (not getrawmetatable or not setreadonly) then
     repeat wait(5) until nil;
 end
 
-local UILibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/Whomever0/exploit-scripts/master/main.lua"))()("UILibrary")
+local Load = loadstring(game:HttpGet("https://raw.githubusercontent.com/Whomever0/exploit-scripts/master/main.lua"))();
+local UILibrary = Load("UILibrary")
 local ChooseType = UILibrary:MakeWindow('Skill Type')
 ChooseType:addLabel('CHOOSE YOUR SKILL TYPE', 'Center')
 ChooseType:addLabel('OP does a lot more DMG', 'Center')
@@ -40,6 +41,8 @@ local UtilModule;
 
 local ToggleValue = false;
 local SwordSkillsValue = false;
+
+local MobInfo = Load("SwordburstMobInfo")
 
 local HitInfo = {
     HitCounter = {};
