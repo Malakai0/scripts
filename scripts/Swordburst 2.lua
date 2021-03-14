@@ -339,14 +339,20 @@ end
 local function AuraHit()
     local Root = Player.Character:WaitForChild('LowerTorso', 2)
     local Hits = ToggleValue and math.clamp(getgenv().Multiplier, 1, 50) or 1;
-    for _ = 1, Hits do
-        for _,Mob in next, workspace.Mobs:GetChildren() do
-            local PrimaryPart = Mob:IsA'Model' and Mob.PrimaryPart
-            local Distance = PrimaryPart and (Root.Position - PrimaryPart.Position).Magnitude
-            local Waiting = SwordSkillsValue == false and HitInfo.Waiting[Mob]
-            if (Distance and Distance <= 30 and (not Invalid(Mob)) and (not Waiting)) then
-                coroutine.wrap(HitMob)(Mob)
-            end
+
+    local T = {}
+    for _,Mob in next, workspace.Mobs:GetChildren() do
+        local PrimaryPart = Mob:IsA'Model' and Mob.PrimaryPart
+        local Distance = PrimaryPart and (Root.Position - PrimaryPart.Position).Magnitude
+        local Waiting = SwordSkillsValue == false and HitInfo.Waiting[Mob]
+        if (Distance and Distance <= 30 and (not Invalid(Mob)) and (not Waiting)) then
+            table.insert(T, Mob)
+        end
+    end
+
+    for _,Mob in next, T do
+        for _ = 1, Hits do
+            coroutine.wrap(HitMob)(Mob)
         end
     end
 end
