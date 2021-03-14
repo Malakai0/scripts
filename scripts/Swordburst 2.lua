@@ -54,6 +54,7 @@ local Priority = {
 }
 
 local CurrentPriority = Priority.Closest;
+local LockedPlayerPosition;
 
 local HitInfo = {
     HitCounter = {};
@@ -448,6 +449,7 @@ end)
 local KillAura = MainWindow:addCheckbox('Kill Aura')
 local InfStamina = MainWindow:addCheckbox('Infinite Stamina')
 local SwordSkills = MainWindow:addCheckbox('Use Sword Skills')
+local LockPlayerPosition = MainWindow:addCheckbox('Lock Player Position');
 MainWindow:addButton("Go Invisible (Until Death)", function()
     local Character = Player.Character;
     if (Character:FindFirstChild("LowerTorso") and Character.LowerTorso:FindFirstChild('Root')) then
@@ -514,6 +516,17 @@ game:GetService("RunService").Heartbeat:Connect(function()
     SwordSkillsValue = SwordSkills.Checked.Value
     AutofarmToggle = FarmEnabled.Checked.Value;
     CurrentPriority = PrioritizeBoss.Checked.Value and Priority.Boss or Priority.Closest
+    if (LockPlayerPosition.Checked.Value and not LockedPlayerPosition) then
+        LockedPlayerPosition = Player.Character:FindFirstChild'HumanoidRootPart'.CFrame;
+    elseif (not LockPlayerPosition.Checked.Value) then
+        LockedPlayerPosition = nil;
+    end
+
+    if (LockPlayerPosition.Checked.Value and LockedPlayerPosition) then
+        if (Player.Character and Player.Character:FindFirstChild'HumanoidRootPart') then
+            Player.Character.HumanoidRootPart.CFrame = LockedPlayerPosition;
+        end
+    end
 
     if (AutofarmToggle) then
         spawn(UpdateAutofarm)
