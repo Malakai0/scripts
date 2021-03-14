@@ -345,7 +345,7 @@ local function AuraHit()
         local PrimaryPart = Mob:IsA'Model' and Mob.PrimaryPart
         local Distance = PrimaryPart and (Root.Position - PrimaryPart.Position).Magnitude
         local Waiting = SwordSkillsValue == false and HitInfo.Waiting[Mob]
-        if (Distance and Distance <= 30 and (not Invalid(Mob)) and (not Waiting)) then
+        if (Distance and Distance <= 25 and (not Invalid(Mob)) and (not Waiting)) then
             table.insert(T, Mob)
         end
     end
