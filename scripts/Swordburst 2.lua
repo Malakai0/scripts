@@ -3,6 +3,8 @@ if (not getrawmetatable or not setreadonly) then
     repeat wait(5) until nil;
 end
 
+local CurrentPlace = game.PlaceId;
+
 local Load = loadstring(game:HttpGet("https://raw.githubusercontent.com/Whomever0/exploit-scripts/master/main.lua"))();
 local UILibrary = Load("UILibrary")
 local ChooseType = UILibrary:MakeWindow('Skill Type')
@@ -41,15 +43,26 @@ local UtilModule;
 
 local ToggleValue = false;
 local SwordSkillsValue = false;
+local AutofarmToggle = false;
 
-local MobInfo = Load("SwordburstMobInfo")
+local SBInfo = Load("SwordburstInfo")
+local PlaceInfo = SBInfo.Mobs[CurrentPlace];
+
+local CurrentFarmTarget;
+
+local Priority = {
+    ["Closest"] = 1;
+    ["Boss"] = 2;
+}
+
+local CurrentPriority = Priority.Closest;
 
 local HitInfo = {
     HitCounter = {};
     Waiting = {};
     HaveHit = {};
     Killed = {};
-    TotalKills = 0 ;
+    TotalKills = 0;
 };
 
 local WhitelistedSkills = {
@@ -61,6 +74,22 @@ local WhitelistedClasses = {
     ['Katana'] = 'Leaping Slash';
     ['1HSword'] = 'Sweeping Strike';
 }
+
+local InsideDoorP = SBInfo.Doors.Inside[CurrentPlace];
+local OutsideDoorP = SBInfo.Doors.Outside[CurrentPlace];
+local InsideDoor,OutsideDoor;
+Player:RequestStreamAroundAsync(InsideDoorP.Position);
+Player:RequestStreamAroundAsync(OutsideDoorP.Position);
+
+for _,v in next, workspace:GetDescendants() do
+    if v:IsA("BasePart") then
+        if (v.CFrame == InsideDoorP) then
+            InsideDoor = v;
+        elseif (v.CFrame == OutsideDoorP) then
+            OutsideDoor = v;
+        end
+    end
+end
 
 local MainWindow = UILibrary:MakeWindow('Main')
 
@@ -82,13 +111,17 @@ local function SetModules()
         end
     end
 end
-SetModules()
 
-if not UtilModule then
-    repeat
-        wait(1)
-        SetModules()
-    until UtilModule
+local function TeleportToBossRoom()
+    firetouchinterest(Player.Character.PrimaryPart, InsideDoor, 0)
+    wait()
+    firetouchinterest(Player.Character.PrimaryPart, InsideDoor, 1);
+end
+
+local function TeleportOutBossRoom()
+    firetouchinterest(Player.Character.PrimaryPart, OutsideDoor, 0)
+    wait()
+    firetouchinterest(Player.Character.PrimaryPart, OutsideDoor, 1);
 end
 
 local function GetInventoryRarityStuff()
@@ -137,6 +170,7 @@ end
 
 local UsedToFuck;
 local function PerformEpic()
+    SetModules()
     local Success, ChosenSkill, ShouldSwap, SwapTo = CheckWhitelist(function()
         local Equipped = PlayerProfile.Equip
         local Left,Right = Equipped.Left.Value,Equipped.Right.Value
@@ -315,6 +349,59 @@ local function AuraHit()
     end
 end
 
+local function GetTargetMob()
+    if (CurrentPriority == Priority.Boss) then
+        local BossMob = workspace.Mobs:FindFirstChild(PlaceInfo.Boss);
+        local Ent = BossMob and BossMob:FindFirstChild'Entity'
+        if (Ent and Ent.Health.Value > 0) then
+            return BossMob;
+        end
+    end
+
+    local Closest,Dist = nil,0;
+
+    for _,Mob in next, workspace.Mobs:GetChildren() do
+        local Ent = Mob and Mob:FindFirstChild'Entity'
+        local PP = Mob.PrimaryPart
+        if (Ent and Ent.Health.Value > 0 and PP) then
+            local Di = (Player.Character.PrimaryPart.Position - PP.Position).Magnitude
+            if (Di < Dist) then
+                Dist = Di;
+                Closest = Mob;
+            end
+        end
+    end
+
+    return Closest;
+end
+
+local function GetWaypoints(A,B)
+	local Waypoints = {}
+	local Distance = (B - A).Magnitude;
+	local Floored = math.floor(Distance);
+	local Index = 1;
+    if (Floored > 7) then
+        for i = 0, Floored, 7 do
+            Waypoints[Index] = A:Lerp(B, i/(Floored))
+            Index = Index + 1;
+        end
+    end
+	Waypoints[#Waypoints+1] = A:Lerp(B, 1)
+	return Waypoints
+end
+
+local WaypointPosition;
+local function UpdateAutofarm()
+    CurrentFarmTarget = GetTargetMob();
+    local PlayerP = Player.Character.PrimaryPart;
+    PlayerP.Velocity = Vector3.new(0,2,0);
+    WaypointPosition = GetWaypoints(PlayerP.Position, CurrentFarmTarget.PrimaryPart.Position)[1]
+
+    PlayerP.CFrame = CFrame.new(WaypointPosition);
+
+    coroutine.wrap(HitMob)(CurrentFarmTarget)
+end
+
 if (TypeChosen == 2) then
     PerformEpic()
 else
@@ -340,6 +427,13 @@ MainWindow:addButton("Go Invisible (Until Death)", function()
         RootClone.Parent = Character.LowerTorso;
     end
 end)
+
+SectionTitle("Autofarm", true);
+local FarmEnabled = MainWindow:addCheckbox('Autofarm Enabled')
+MainWindow:addButton("Teleport into boss room", TeleportToBossRoom)
+MainWindow:addButton("Teleport out of boss room", TeleportOutBossRoom)
+local PrioritizeBoss = MainWindow:addCheckbox("Prioritize boss")
+
 
 SectionTitle("Stat Gains", true)
 
@@ -372,6 +466,7 @@ local Pluralized = {
     ["Common"] = "Commons";
 }
 
+SetModules()
 local FirstVals = {
     Vel = Vel.Value;
     Exp = Exp.Value;
@@ -382,6 +477,12 @@ local FirstVals = {
 game:GetService("RunService").Heartbeat:Connect(function()
     ToggleValue = true
     SwordSkillsValue = SwordSkills.Checked.Value
+    AutofarmToggle = FarmEnabled.Checked.Value;
+    CurrentPriority = PrioritizeBoss.Checked.Value and 2 or 1;
+
+    if (AutofarmToggle) then
+        spawn(UpdateAutofarm)
+    end
 
     if (KillAura.Checked.Value) then
         spawn(AuraHit);
