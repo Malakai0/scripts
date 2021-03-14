@@ -79,8 +79,8 @@ local OutsideDoorP = SBInfo.Doors.Outside[CurrentPlace];
 local InsideDoor,OutsideDoor;
 
 if (workspace.StreamingEnabled) then
-    Player:RequestStreamAroundAsynRequestStreamAroundAsyncc(InsideDoorP.Position);
-    Player:(OutsideDoorP.Position);
+    Player:RequestStreamAroundAsync(InsideDoorP.Position);
+    Player:RequestStreamAroundAsync(OutsideDoorP.Position);
 end
 
 for _,v in next, workspace:GetDescendants() do
