@@ -460,7 +460,7 @@ end)
 SectionTitle("Autofarm", true);
 local FarmEnabled = MainWindow:addCheckbox('Autofarm Enabled')
 MainWindow:addButton("Teleport into boss room", TeleportToBossRoom)
-MainWindow:addButton("Teleport out of boss room", TeleportOutBossRoom)
+MainWindow:addButton("Teleport to end", TeleportOutBossRoom)
 local PrioritizeBoss = MainWindow:addCheckbox("Prioritize boss")
 
 
