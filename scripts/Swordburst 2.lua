@@ -412,10 +412,10 @@ local function UpdateAutofarm()
         end
 
         local WaypointPosition;
-        if (Dist < 20) then
+        if (Dist < 4) then
             WaypointPosition = PlayerP.Position;
         else
-            local L = GetWaypoints(PlayerP.Position, TPP.Position + Vector3.new(0,10.1,0))
+            local L = GetWaypoints(PlayerP.Position, TPP.Position + Vector3.new(0,15,0))
             WaypointPosition = L[1];
         end
 

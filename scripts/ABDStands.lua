@@ -34,7 +34,8 @@ local Defaults = {
     end;
 }
 
-local BizarreLibrary = loadstring(game:HttpGet('https://pastebin.com/raw/kqvHxq9s', true))()
+local Load = loadstring(game:HttpGet("https://raw.githubusercontent.com/Whomever0/exploit-scripts/master/main.lua"))();
+local BizarreLibrary = Load("BizarreLibrary")
 
 local LogEnum = {
     PROTOS = 'protos';
