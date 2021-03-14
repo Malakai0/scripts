@@ -48,8 +48,6 @@ local AutofarmToggle = false;
 local SBInfo = Load("SwordburstInfo")
 local PlaceInfo = SBInfo.Mobs[CurrentPlace];
 
-local CurrentFarmTarget;
-
 local Priority = {
     ["Closest"] = 1;
     ["Boss"] = 2;
@@ -353,17 +351,18 @@ local function GetTargetMob()
     if (CurrentPriority == Priority.Boss) then
         local BossMob = workspace.Mobs:FindFirstChild(PlaceInfo.Boss);
         local Ent = BossMob and BossMob:FindFirstChild'Entity'
-        if (Ent and Ent.Health.Value > 0) then
-            return BossMob;
+        local PrimaryPart = BossMob and BossMob:IsA'Model' and BossMob.PrimaryPart
+        if (PrimaryPart and Ent and Ent.Health.Value > 0) then
+            return BossMob,true;
         end
     end
 
-    local Closest,Dist = nil,0;
+    local Closest,Dist = nil,math.huge;
 
     for _,Mob in next, workspace.Mobs:GetChildren() do
         local Ent = Mob and Mob:FindFirstChild'Entity'
-        local PP = Mob.PrimaryPart
-        if (Ent and Ent.Health.Value > 0 and PP) then
+        local PP = Mob:IsA'Model' and Mob.PrimaryPart
+        if (PP and Ent and Ent.Health.Value > 0) then
             local Di = (Player.Character.PrimaryPart.Position - PP.Position).Magnitude
             if (Di < Dist) then
                 Dist = Di;
@@ -372,7 +371,7 @@ local function GetTargetMob()
         end
     end
 
-    return Closest;
+    return Closest,false;
 end
 
 local function GetWaypoints(A,B)
@@ -380,8 +379,9 @@ local function GetWaypoints(A,B)
 	local Distance = (B - A).Magnitude;
 	local Floored = math.floor(Distance);
 	local Index = 1;
-    if (Floored > 7) then
-        for i = 0, Floored, 7 do
+    local minDist = 8;
+    if (Floored > minDist) then
+        for i = minDist, Floored, minDist do
             Waypoints[Index] = A:Lerp(B, i/(Floored))
             Index = Index + 1;
         end
@@ -390,16 +390,45 @@ local function GetWaypoints(A,B)
 	return Waypoints
 end
 
-local WaypointPosition;
+local AutofarmPositionUpdate = true;
 local function UpdateAutofarm()
-    CurrentFarmTarget = GetTargetMob();
+    local CurrentFarmTarget,IsBoss = GetTargetMob();
     local PlayerP = Player.Character.PrimaryPart;
     PlayerP.Velocity = Vector3.new(0,2,0);
-    WaypointPosition = GetWaypoints(PlayerP.Position, CurrentFarmTarget.PrimaryPart.Position)[1]
+    Player.Character:WaitForChild'Humanoid':ChangeState(11)
 
-    PlayerP.CFrame = CFrame.new(WaypointPosition);
+    local TPP = CurrentFarmTarget and CurrentFarmTarget.PrimaryPart;
+    local Validate = CurrentFarmTarget and TPP
+    local Dist = TPP and (TPP.Position - PlayerP.Position).Magnitude
+    local BossRoomWaiting = CurrentPriority == Priority.Boss and not Validate or (Validate and (Dist > 1000))
+    if (not BossRoomWaiting and AutofarmPositionUpdate) then
+        AutofarmPositionUpdate = false;
+        if (Dist > 1000 and IsBoss) then
+            TeleportToBossRoom()
+        end
 
-    coroutine.wrap(HitMob)(CurrentFarmTarget)
+        local WaypointPosition;
+        if (Dist < 20) then
+            WaypointPosition = PlayerP.Position;
+        else
+            local L = GetWaypoints(PlayerP.Position, TPP.Position + Vector3.new(0,10.1,0))
+            WaypointPosition = L[1];
+        end
+
+        PlayerP.CFrame = CFrame.new(WaypointPosition);
+
+        local Hits = ToggleValue and math.clamp(getgenv().Multiplier, 1, 50) or 1;
+        for _ = 1, Hits do
+            if (not HitMob(CurrentFarmTarget)) then
+                break;
+            end
+        end
+
+        wait(0.1)
+        AutofarmPositionUpdate = true
+    elseif (BossRoomWaiting) then
+        TeleportToBossRoom()
+    end
 end
 
 if (TypeChosen == 2) then
@@ -474,11 +503,17 @@ local FirstVals = {
     InvRarities = GetInventoryRarityStuff();
 }
 
+repeat wait() until Player.Character and Player.Character.PrimaryPart;
+local P = Player.Character.PrimaryPart.CFrame;
+TeleportToBossRoom()
+wait(.25)
+Player.Character:BreakJoints();
+
 game:GetService("RunService").Heartbeat:Connect(function()
     ToggleValue = true
     SwordSkillsValue = SwordSkills.Checked.Value
     AutofarmToggle = FarmEnabled.Checked.Value;
-    CurrentPriority = PrioritizeBoss.Checked.Value and 2 or 1;
+    CurrentPriority = PrioritizeBoss.Checked.Value and Priority.Boss or Priority.Closest
 
     if (AutofarmToggle) then
         spawn(UpdateAutofarm)
