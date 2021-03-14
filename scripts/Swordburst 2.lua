@@ -77,8 +77,11 @@ local WhitelistedClasses = {
 local InsideDoorP = SBInfo.Doors.Inside[CurrentPlace];
 local OutsideDoorP = SBInfo.Doors.Outside[CurrentPlace];
 local InsideDoor,OutsideDoor;
-Player:RequestStreamAroundAsync(InsideDoorP.Position);
-Player:RequestStreamAroundAsync(OutsideDoorP.Position);
+
+if (workspace.StreamingEnabled) then
+    Player:RequestStreamAroundAsynRequestStreamAroundAsyncc(InsideDoorP.Position);
+    Player:(OutsideDoorP.Position);
+end
 
 for _,v in next, workspace:GetDescendants() do
     if v:IsA("BasePart") then
