@@ -72,6 +72,8 @@ if (not getgenv().hookApplied) then
             end;
         end
 
+        return index(self, key);
+
     end
 
     mt.__namecall = function(self, ...)
