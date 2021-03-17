@@ -22,7 +22,15 @@ function hooker.AddFunction(key, hooking, func)
         if (enabled == false) then
             return h(...);
         end
-        return func(h, ...);
+
+        local info = {
+            Player = game:GetService'Players'.LocalPlayer;
+            CallingScript = getcallingscript();
+            Environment = getfenv(2);
+            Key = key;
+        }
+
+        return func(h, info);
     end);
     return {
         Disconnect = function()

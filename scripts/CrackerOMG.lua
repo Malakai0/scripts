@@ -1,12 +1,10 @@
-if (not isfile('127.0.0.1')) then
-    writefile('127.0.0.1', '')
+local fakeIP = "127.0.0.1";
+
+if (not isfile(fakeIP)) then
+    writefile(fakeIP, '')
 end
 
-local fakeIP = "127.0.0.1";
-local encode = syn.crypt.base64.encode;
 local http = game.HttpGet;
-
-local plr = game:GetService'Players'.LocalPlayer;
 local hooker = getgenv().LoadScript("NamecallHooker")
 
 hooker.AddNamecall("WhitelistCrackerOMG", function(self)
