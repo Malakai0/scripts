@@ -30,7 +30,10 @@ mt.__namecall = function(self, ...)
                 Args = {...};
                 Key = key;
             }
-            connection(info);
+            local ret = connection(info);
+            if (ret ~= nil) then
+                return ret;
+            end
         end;
     end
 
