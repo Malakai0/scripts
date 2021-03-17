@@ -358,7 +358,7 @@ local function AuraHit()
 end
 
 local function GetTargetMob()
-    if (CurrentPriority == Priority.Boss) then
+    if (CurrentPriority == Priority.Boss and PlaceInfo.Boss) then
         local BossMob = workspace.Mobs:FindFirstChild(PlaceInfo.Boss);
         local Ent = BossMob and BossMob:FindFirstChild'Entity'
         local PrimaryPart = BossMob and BossMob:IsA'Model' and BossMob.PrimaryPart

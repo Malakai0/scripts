@@ -118,7 +118,7 @@ return {
             'Shadow Figure';
             'Ra';
             'Da';
-            MiniBoss = 'Ka';
+            Boss = 'Ka';
         };
     
     };
