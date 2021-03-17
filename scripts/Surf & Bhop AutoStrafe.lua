@@ -1,6 +1,5 @@
 local A,D = 0x41, 0x44
 local Holding = nil;
-local Toggle = false;
 
 local function ReleaseCurrent()
     if (Holding) then

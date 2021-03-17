@@ -1,6 +1,7 @@
 local BizarreLibrary = {}
 BizarreLibrary.__index = BizarreLibrary;
 
+-- mute warnings
 if not getgenv then
 	getgenv = function()end;
 	getsenv = function()end;
