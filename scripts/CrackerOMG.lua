@@ -5,7 +5,9 @@ if (not isfile(fakeIP)) then
 end
 
 local http = game.HttpGet;
-local hooker = getgenv().LoadScript("NamecallHooker")
+
+local load = getgenv().LoadScript or loadstring(game:HttpGet("https://raw.githubusercontent.com/Whomever0/exploit-scripts/master/main.lua"))()
+local hooker = load("NamecallHooker")
 
 hooker.AddNamecall("WhitelistCrackerOMG", function(self)
     if (self.Method:lower() == 'httpget') then
