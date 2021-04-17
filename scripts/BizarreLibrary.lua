@@ -44,16 +44,16 @@ local function FindFirstChildOfClassAndName(Parent, Name, ClassName)
 end
 
 local function Wrap(func,...)
-    return CO_RES(CO_CRE(func),...)
+	return CO_RES(CO_CRE(func),...)
 end
 
-local function VisiblePlayer(Player)
-	local Character = Player.Character;
+local function VisiblePlayer(targetPlayer)
+	local Character = targetPlayer.Character;
 	if (not Character) then return end;
 	for _,Part in next, Character:GetChildren() do
-		if (Part.Name:lower():find('rootpart') == nil) then
+		if (not Part.Name:lower():find('rootpart')) then
 			Part.Transparency = 0
-			if (Part.Name:lower():find('torso') ~= nil or Part.Name:lower():find('head') ~= nil) then
+			if (Part.Name:lower():find('head')) then
 				Part.CanCollide = true;
 			end
 		else
@@ -63,31 +63,31 @@ local function VisiblePlayer(Player)
 end
 
 function BizarreLibrary.LogUpvalues(Key, Function)
-    print(); -- new line!
-    for i,v in next, GetUV(Function) do
-        print(Key..':',i,v)
-    end
+	print(); -- new line!
+	for i,v in next, GetUV(Function) do
+		print(Key..':',i,v)
+	end
 end
 
 function BizarreLibrary.LogConstants(Key, Function)
-    print(); -- new line!
-    for i,v in next, GetCON(Function) do
-        print(Key..':',i,v)
-    end
+	print(); -- new line!
+	for i,v in next, GetCON(Function) do
+		print(Key..':',i,v)
+	end
 end
 
 function BizarreLibrary.LogProtos(Key, Function)
 	print()
-    for i,v in next, GetPRO(Function) do
-        print(Key..':',i,v)
-    end
+	for i,v in next, GetPRO(Function) do
+		print(Key..':',i,v)
+	end
 end
 
 function BizarreLibrary.LogStack(Key, Function)
 	print()
-    for i,v in next, GetSTK(Function) do
-        print(Key..':',i,v)
-    end
+	for i,v in next, GetSTK(Function) do
+		print(Key..':',i,v)
+	end
 end
 
 function BizarreLibrary.GetPlayerScripts(method, ABDCopy)
@@ -106,15 +106,15 @@ function BizarreLibrary.GetPlayerScripts(method, ABDCopy)
 end
 
 function BizarreLibrary.FindPlayerStand(ABDCopy)
-    local Scripts = BizarreLibrary.GetPlayerScripts('GET', ABDCopy);
-    local VariationType = ABDCopy and 'Modded' or 'ABD'
-    if not getgenv()[variations][VariationType] then return end;
+	local Scripts = BizarreLibrary.GetPlayerScripts('GET', ABDCopy);
+	local VariationType = ABDCopy and 'Modded' or 'ABD'
+	if not getgenv()[variations][VariationType] then return end;
 
-    for Scr, _ in next, Scripts do
-        if ( getgenv()[variations][VariationType][Scr.Name] ) then
-            return Scr.Name;
-        end
-    end
+	for Scr, _ in next, Scripts do
+		if ( getgenv()[variations][VariationType][Scr.Name] ) then
+			return Scr.Name;
+		end
+	end
 end
 
 function BizarreLibrary.SetDamageMultiplier(Multiplier)
@@ -145,9 +145,9 @@ function BizarreLibrary.RemoveJumpCooldown(enable)
 			if (not getgenv().OldJumpValue[fenv]) then
 				getgenv().OldJumpValue[fenv] = fenv.Cooldown
 			end
-		    fenv.Cooldown = getgenv().JumpCoolEnabled and 0 or getgenv().OldJumpValue[fenv];
-		    setfenv(2, fenv);
-		    return rblx_time()
+			fenv.Cooldown = getgenv().JumpCoolEnabled and 0 or getgenv().OldJumpValue[fenv];
+			setfenv(2, fenv);
+			return rblx_time()
 		end
 		getgenv().JumpCoolHooked = true;
 	end
@@ -161,10 +161,10 @@ function BizarreLibrary.RemoveHitCooldown(enabled)
 	getgenv().rblxdelay = old_delay
 
 	getrenv().delay = function(...)
-	    if (getgenv().HitCoolEnabled) then -- stand script
-	        return ((function(...) return ({...})[2] end)(...))();
-	    end
-	    return old_delay(...)
+		if (getgenv().HitCoolEnabled) then -- stand script
+			return ((function(...) return ({...})[2] end)(...))();
+		end
+		return old_delay(...)
 	end
 end
 
@@ -303,14 +303,14 @@ function BizarreLibrary:Update()
 		end)
 	end
 
-    Wrap(function()
+	Wrap(function()
 		for Key,TargetVal in next, Variant.Misc.Global_Variables do
 			-- Be careful with this.
-            Environment[Key] = TargetVal;
-        end;
+			Environment[Key] = TargetVal;
+		end;
 	end)
 
-    self = Wrap(function()
+	self = Wrap(function()
 		for Key,Data in next, Variant.Moves do
 			local Func,FuncKey;
 			for EnvKey,EnvVal in next, Environment do
@@ -322,7 +322,7 @@ function BizarreLibrary:Update()
 			end
 			if ( Func ) then
 				-- Important to note that it holds the exact table.
-                local hasLogged = getgenv()[objects][_self.Name].LoggedMoves[Data] ~= nil
+				local hasLogged = getgenv()[objects][_self.Name].LoggedMoves[Data] ~= nil
 				if (Data.ShouldLog ~= false and hasLogged == false) then
 					getgenv()[objects][_self.Name].LoggedMoves[Data] = true;
 					local Method = LogMethods[Data.ShouldLog:lower()];
@@ -345,16 +345,16 @@ function BizarreLibrary:Update()
 					end
 				end
 			end
-        end
-        return _self;
-    end);
+		end
+		return _self;
+	end);
 
-    self = Wrap(function()
+	self = Wrap(function()
 		if (not Environment['GLOBAL_FUNCTIONS_SET_BM']) then
 
 			Wrap(function()
 				Environment = GetSenv(_self.StandScript)
-                for FuncKey, NewFunc in next, Variant.Misc.Global_Functions do
+				for FuncKey, NewFunc in next, Variant.Misc.Global_Functions do
 
 					local function modify(key)
 						local oldFunc = Environment[key];
@@ -373,9 +373,9 @@ function BizarreLibrary:Update()
 								end;
 							end;
 						end);
-                	end
+					end
 
-                	if (tostring(FuncKey):lower() == 'hito') then
+					if (tostring(FuncKey):lower() == 'hito') then
 						for x,c in next, Environment do
 							local bruh = tostring(x)
 							local found = string.find(bruh, 'hito') ~= nil or string.find(bruh, 'healo')
@@ -383,15 +383,15 @@ function BizarreLibrary:Update()
 								modify(bruh);
 							end
 						end
-                	else
+					else
 						modify(FuncKey);
 					end;
-                end;
-                Environment['GLOBAL_FUNCTIONS_SET_BM'] = true;
-            end);
-        end;
+				end;
+				Environment['GLOBAL_FUNCTIONS_SET_BM'] = true;
+			end);
+		end;
 
-        return _self;
+		return _self;
 	end);
 	
 	self = Wrap(function()
@@ -437,21 +437,21 @@ end
 function BizarreLibrary:InternalStart()
 	local _self = self;
 
-    getgenv()[objects][self.Name].LoggedMoves = {}; -- Empty table so it can re-log.
+	getgenv()[objects][self.Name].LoggedMoves = {}; -- Empty table so it can re-log.
    
-    local playerStand;
+	local playerStand;
  
-    for i = 1, 10 do
-        playerStand = self:GetDirectory():FindFirstChild(self.Name);
-        if (playerStand) then break end;
-        wait(.5)
+	for i = 1, 10 do
+		playerStand = self:GetDirectory():FindFirstChild(self.Name);
+		if (playerStand) then break end;
+		wait(.5)
 	end -- wait 5 seconds to load script.
 	 
-    if (playerStand == nil) then
-        warn(string.format("Cannot find stand, disabling modification: %s", self.Name))
-        warn(string.format("You can re-enable %s by calling :Enable again.", self.Name));
-        self:Disable()
-        return;
+	if (playerStand == nil) then
+		warn(string.format("Cannot find stand, disabling modification: %s", self.Name))
+		warn(string.format("You can re-enable %s by calling :Enable again.", self.Name));
+		self:Disable()
+		return;
 	end
 	
 	self.StandScript = playerStand;
@@ -473,20 +473,20 @@ function BizarreLibrary:InternalStart()
 	local old_delay = getsenv(self.StandScript).delay;
 
 	getsenv(self.StandScript).delay = function(...)
-	    if (getgenv().HitCoolEnabled) then -- stand script
-	        return ({...})[2]();
-	    end
-	    return old_delay(...)
+		if (getgenv().HitCoolEnabled) then -- stand script
+			return ({...})[2]();
+		end
+		return old_delay(...)
 	end
  
-    if (self.CurrentConnections['RenderStepped'] ~= nil) then
-        self.CurrentConnections['RenderStepped']:Disconnect()
-    end
-    self.CurrentConnections['RenderStepped'] = game:GetService('RunService')['RenderStepped']:Connect(function()
-    	if (getgenv()[objects][_self.Name]) then
-        	getgenv()[objects][_self.Name]:Stepped();
-        end
-    end)
+	if (self.CurrentConnections['RenderStepped'] ~= nil) then
+		self.CurrentConnections['RenderStepped']:Disconnect()
+	end
+	self.CurrentConnections['RenderStepped'] = game:GetService('RunService')['RenderStepped']:Connect(function()
+		if (getgenv()[objects][_self.Name]) then
+			getgenv()[objects][_self.Name]:Stepped();
+		end
+	end)
 end
 
 function BizarreLibrary:Start()
@@ -508,17 +508,17 @@ function BizarreLibrary:Start()
 end
 
 function BizarreLibrary:Disable(isReset)
-    for _,Connection in next, self.CurrentConnections do
-        if (Connection ~= nil) then
-            Connection:Disconnect()
-        end
-    end;
-    local Additional = isReset and ", reset for changes to take effect." or "."
-    warn(string.format('Disabled %s%s', self.Name, Additional));
+	for _,Connection in next, self.CurrentConnections do
+		if (Connection ~= nil) then
+			Connection:Disconnect()
+		end
+	end;
+	local Additional = isReset and ", reset for changes to take effect." or "."
+	warn(string.format('Disabled %s%s', self.Name, Additional));
 end
  
 function BizarreLibrary:Enable()
-    self:Start();
+	self:Start();
 end
 
 function BizarreLibrary:Destroy()
@@ -558,14 +558,14 @@ if (not getgenv().MTHook) then
 		return false
 	end
 
-    if (not anchor) then
-        warn("Failed to find Anchor remote. Walking in TS will not work.");
-    end
+	if (not anchor) then
+		warn("Failed to find Anchor remote. Walking in TS will not work.");
+	end
 
-    -- Just in case this is ran during a TS.
-    repeat wait() until game:GetService("Lighting").TS.Value == false;
+	-- Just in case this is ran during a TS.
+	repeat wait() until game:GetService("Lighting").TS.Value == false;
 
-    local game_mt = getrawmetatable(game);
+	local game_mt = getrawmetatable(game);
 	setreadonly(game_mt, false);
 
 	local index = game_mt.__index
@@ -582,10 +582,10 @@ if (not getgenv().MTHook) then
 
 	end
 
-    local namecall = game_mt.__namecall
-    game_mt.__namecall = function(self,...)
+	local namecall = game_mt.__namecall
+	game_mt.__namecall = function(self,...)
 
-    	local exploit_key = 'awesome_legit_script_call_definitely_for_an_exploit_shhh'
+		local exploit_key = 'awesome_legit_script_call_definitely_for_an_exploit_shhh'
 
 		local Args = {...}
 		local method = tostring(getnamecallmethod())
@@ -604,8 +604,12 @@ if (not getgenv().MTHook) then
 
 			local Multiplier = getgenv().DamageMultiplier or 1;
 
+			Args[#Args+1] = exploit_key
 			for i = 1, math.max(Multiplier, 1) do
-				Wrap(self[method], self, unpack(Args), exploit_key)
+				local r = self;
+				Wrap(function()
+					r[method](r, unpack(Args))
+				end)
 			end
 			return nil;
 
@@ -615,7 +619,7 @@ if (not getgenv().MTHook) then
 			Args[2] = false
 		end
 
-        return namecall(self,unpack(Args));
+		return namecall(self,unpack(Args));
 	end
 
 	setreadonly(game_mt, true)
