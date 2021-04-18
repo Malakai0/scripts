@@ -317,7 +317,7 @@ local function HitMob(Target)
         {
             'Attack',
             GetSwordMethod(),
-            1,
+            "1",
             Target
         },
         ExploitCallKey
