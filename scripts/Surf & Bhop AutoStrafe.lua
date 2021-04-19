@@ -8,7 +8,7 @@ local function ReleaseCurrent()
     end
 end
 
-local function StimulatePress(Key)
+local function SimulatePress(Key)
     if (Holding ~= Key) then
         ReleaseCurrent()
         Holding = Key;
@@ -23,11 +23,11 @@ game:GetService'RunService'.Heartbeat:Connect(function()
     
     if (game:GetService'UserInputService':IsKeyDown(Enum.KeyCode.E)) then
         if (Normal == 0 and Holding) then
-            StimulatePress(Holding)
+            SimulatePress(Holding)
         elseif (Normal == 1) then -- right
-            StimulatePress(D)
+            SimulatePress(D)
         elseif (Normal == -1) then -- left
-            StimulatePress(A)
+            SimulatePress(A)
         end
     else
         ReleaseCurrent()
