@@ -42,9 +42,9 @@ game:GetService'RunService'.Heartbeat:Connect(function()
         LastRespawn = tick()
         Respawning = false
         VirtualUser:CaptureController()
-        vu:SetKeyDown(0x77)
+        VirtualUser:SetKeyDown(0x77)
         wait(.1)
-        vu:SetKeyUp(0x77)
+        VirtualUser:SetKeyUp(0x77)
     end
 
     if (HumanoidRootPart and Position) then
