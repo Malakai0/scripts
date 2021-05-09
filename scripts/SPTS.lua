@@ -35,7 +35,7 @@ game:GetService'RunService'.Heartbeat:Connect(function()
     local Humanoid = Character:FindFirstChildOfClass('Humanoid')
     local HumanoidRootPart = Character:FindFirstChild'HumanoidRootPart'
 
-    if (tick() - LastRespawn >= 1.25 and (not Respawning)) then
+    if (tick() - LastRespawn >= (getgenv().RespawnInterval or 1.25) and (not Respawning)) then
         Respawning = true
 	    Respawn()
         repeat wait() until Player.Character ~= Character;
