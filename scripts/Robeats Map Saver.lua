@@ -32,3 +32,4 @@ local function SaveDirectory(Directory, IsRemix)
 end
 
 SaveDirectory(game:GetService'ReplicatedStorage'.NewSong)
+SaveDirectory(game:GetService'ReplicatedStorage'.Song)
