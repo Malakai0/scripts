@@ -1,9 +1,13 @@
 local NOTE_SPEED = 20;
 
-getgenv().NOTE_SPEED = NOTE_SPEED
+getgenv().NOTE_SPEED = NOTE_SPEED;
+
+local ret = function(Setting)
+    getgenv().NOTE_SPEED = Setting
+end
 
 if (getgenv().ran_notespeed_hooker) then
-    repeat wait(600) until nil
+    return ret
 end
 
 getgenv().ran_notespeed_hooker = true
@@ -39,3 +43,5 @@ AudioManager.new = function(...)
     
     return _self
 end
+
+return ret;
