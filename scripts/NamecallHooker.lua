@@ -59,6 +59,7 @@ if (not getgenv().hookApplied) then
 
     setreadonly(mt, false);
 
+    local ind = mt.__index;
     mt.__index = function(self, key)
         
         local connections = rawget(rawget(getgenv(), 'hook_connections'), 'Index');
@@ -72,6 +73,7 @@ if (not getgenv().hookApplied) then
                     Self = self;
                     Key = key;
                     Index = key2;
+                    Function = ind;
                 }
                 local ret = connection(info);
                 if (ret ~= nil) then
@@ -84,7 +86,10 @@ if (not getgenv().hookApplied) then
 
     end
 
+    local nc = mt.__namecall;
     mt.__namecall = function(self, ...)
+
+        local returnValue;
 
         for key,connection in next, getgenv().hook_connections.Namecall do
             if (type(connection) == 'function') then
@@ -96,15 +101,16 @@ if (not getgenv().hookApplied) then
                     Caller = self;
                     Args = {...};
                     Index = key;
+                    Function = nc;
                 }
                 local ret = connection(info);
                 if (ret ~= nil) then
-                    return ret;
+                    returnValue = ret;
                 end
             end;
         end
 
-        return namecall(self, ...)
+        return returnValue or namecall(self, ...)
     end
 end
 
