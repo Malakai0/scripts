@@ -1,4 +1,4 @@
-local base_url = "https://raw.githubusercontent.com/Whomever0/exploit-scripts/master/scripts/%s.lua"
+local base_url = "https://raw.githubusercontent.com/Whomever0/scripts/master/scripts/%s.lua"
 
 local exceptions = {":","/","."}
 
